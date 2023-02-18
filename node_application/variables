@@ -1,0 +1,4 @@
+local_location: /home/diogo/all_ansible/simple-nodejs/nodejs-app-1.0.0.tgz
+destination1: /home/diogo/nodejs-app-1.0.0.tgz
+remote_location: /home/diogo/nodejs-app-1.0.0.tgz
+destination2: /home/diogo/

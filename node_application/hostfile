@@ -1,0 +1,1 @@
+35.174.176.156 ansible_ssh_private_key_file=~/Downloads/practical.pem ansible_user=ubuntu

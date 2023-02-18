@@ -1,0 +1,61 @@
+# In this project, I wrote an ansible playbook that install node and npm on a remote ubuntu server running
+# on aws. From my local machine, it would copy a nodejs application artifacts, which is in a tar format and unpacks
+# it on the remote machine and starts running the application. and from this playbook, also check if the 
+# application is running successfully with the status report on my local machine 
+
+
+---
+- name:  Install a node js application and its package manager npm 
+  hosts:  100.25.166.252
+  tasks:  
+   - name:  update the cache
+     
+     apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+   - name:  install nodejs and npm     
+     apt: 
+       pkg: 
+         - nodejs
+         - npm
+
+- name:  Create a new user account to handle the application deployment
+  hosts:  100.25.166.252
+  tasks:
+   - name: Create new user
+     user:
+      user_name: diogo
+      user_group: diogo
+      user_role: admin
+
+
+- name:  Deploy nodejs application
+  hosts: 100.25.166.252
+  become: True
+  become_user: 
+  vars_files:
+    - variables
+  tasks:
+    - name: Copy nodejs file to remote server
+      copy:
+        src: "{{location}}"
+        dest: "{{destination1}}"
+    - name: unpack the tgz file 
+      unarchive:
+        src: "{{remote_location}}"
+        dest: "{{destination2}}"
+        remote_src: yes
+      register: user_creation_result
+    - debug: msg={{user_creation_result}}
+    
+    - name: Install application's dependencies
+      npm:
+        path: /home/diogo/package
+    - name:  execute application with node
+      command: /home/diogo/package/app/server
+      async: 1000     #This is to run application on the backaground "async" and "poll"
+      poll: 0
+    - name:  #ensure app is running #use shell commands 
+      shell: ps aux | grep node # use "register" module to assign result of this command to a variable
+      register: app_status #use "debug" module to parse the result of the "app_status" as a variable
+    - debug: msg={{app_status}}
+
+
